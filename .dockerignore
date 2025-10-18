@@ -1,0 +1,11 @@
+# Archivos de configuración y logs
+.env
+npm-debug.log
+*.log
+
+# Dependencias locales que no deben ser copiadas a la imagen
+node_modules
+
+# Archivos de Docker
+Dockerfile
+.dockerignore
