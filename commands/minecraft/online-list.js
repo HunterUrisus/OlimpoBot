@@ -7,6 +7,8 @@ module.exports = {
   async execute(interaction) {
     const serverIp = process.env.SERVER_IP;
 
+    await interaction.deferReply();
+
     try {
       const response = await fetch(
         `https://api.mcstatus.io/v2/status/java/${serverIp}`
