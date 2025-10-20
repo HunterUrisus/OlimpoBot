@@ -5,7 +5,7 @@ module.exports = {
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 
-    const serverIp = "147.185.221.30:59080"; // 👈 ¡IMPORTANTE! Reemplaza esto con la IP de tu servidor.
+    const serverIp = process.env.SERVER_IP;
 
     const updateActivity = async () => {
       try {

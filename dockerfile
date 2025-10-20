@@ -28,4 +28,4 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app .
 
 # Comando que se ejecutará cuando el contenedor se inicie.
-CMD ["node", "index.js"]
+CMD ["npm", "start"]
