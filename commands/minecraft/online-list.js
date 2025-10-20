@@ -7,58 +7,66 @@ module.exports = {
   async execute(interaction) {
     const serverIp = process.env.SERVER_IP;
 
+    // 1. Difieres la respuesta (¡Correcto!)
     await interaction.deferReply();
 
     try {
       const response = await fetch(
         `https://api.mcstatus.io/v2/status/java/${serverIp}`
       );
+
       if (!response.ok) {
         console.error(`Error al contactar la API: ${response.statusText}`);
-        await interaction.reply(
-          "No se pudo obtener la lista de jugadores en línea."
+        // 2. CORREGIDO: Se usa .editReply()
+        await interaction.editReply(
+          "No se pudo obtener la lista de jugadores en línea (Error de API)."
         );
         return;
       }
-      const data = await response.json();
 
+      const data = await response.json();
       const embed = new EmbedBuilder();
 
-      if (data.online && data.players.list.length > 0) {
-        const playerList = data.players.list;
+      // 3. LÓGICA SIMPLIFICADA:
+      // Comprobamos si el servidor está online Y si la lista de jugadores existe Y si no está vacía.
+      if (data.online && data.players.list && data.players.list.length > 0) {
         
-        if (playerList.length === 0) {
-          embed
-            .setTitle("Jugadores en línea")
-            .setDescription("No hay jugadores en línea en este momento.")
-            .setColor("#E67E22");
+        // Mapeamos los nombres directamente
+        const playerListString = data.players.list
+          .map((player) => player.name_raw)
+          .join("\n");
 
-          await interaction.reply({ embeds: [embed] });
-        } else {
-          // Si hay alguien conectado
-          const title = `Hay ${playerList.length} jugadores en línea:`;
-          embed
-            .setTitle(title)
-            .setColor("#57F287") // Un verde vibrante
-            .addFields({
-              name: `Conectados (${data.players.online}/${data.players.max})`,
-              value: "```\n" + playerList.map((player) => player.name_raw).join("\n") + "\n```", // El bloque de código lo hace ver muy bien
-              inline: false,
-            });
-
-          await interaction.reply({
-            embeds: [embed],
+        embed
+          .setTitle(`Hay ${data.players.online} jugadores en línea:`)
+          .setColor("#57F287") // Verde vibrante
+          .addFields({
+            name: `Conectados (${data.players.online}/${data.players.max})`,
+            value: "```\n" + playerListString + "\n```",
+            inline: false,
           });
-        }
+
+        // 4. CORREGIDO: Se usa .editReply()
+        await interaction.editReply({ embeds: [embed] });
+
       } else {
-        await interaction.reply("No hay jugadores en línea en este momento.");
+        // 5. CASO UNIFICADO:
+        // Si el servidor está offline o está online pero vacío.
+        embed
+          .setTitle("Servidor Solitario")
+          .setDescription("No hay jugadores en línea en este momento. 텅 비었네...")
+          .setColor("#E67E22"); // Naranja
+
+        // 6. CORREGIDO: Se usa .editReply()
+        await interaction.editReply({ embeds: [embed] });
       }
+
     } catch (error) {
       console.error(
         "No se pudo obtener la lista de jugadores en línea:",
         error
       );
-      await interaction.reply(
+      // 7. CORREGIDO: Se usa .editReply()
+      await interaction.editReply(
         "Error al obtener la lista de jugadores en línea."
       );
     }
