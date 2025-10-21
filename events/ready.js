@@ -52,6 +52,6 @@ module.exports = {
 
     updateActivity();
 
-    setInterval(updateActivity, 30000); // 30000 ms = 30 segundos
+    setInterval(updateActivity, 5000); // 5000 ms = 5 segundos
   },
 };
