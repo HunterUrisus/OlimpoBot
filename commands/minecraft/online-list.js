@@ -47,13 +47,13 @@ module.exports = {
 
         // 4. CORREGIDO: Se usa .editReply()
         await interaction.editReply({ embeds: [embed] });
-
+        
       } else {
         // 5. CASO UNIFICADO:
         // Si el servidor está offline o está online pero vacío.
         embed
           .setTitle("Servidor Solitario")
-          .setDescription("No hay jugadores en línea en este momento. 텅 비었네...")
+          .setDescription("No hay jugadores en línea en este momento.")
           .setColor("#E67E22"); // Naranja
 
         // 6. CORREGIDO: Se usa .editReply()
