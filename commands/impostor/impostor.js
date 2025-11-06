@@ -2,6 +2,7 @@ const {
   valorant_jugadores,
   valorant_agentes,
   lol_campeones,
+  cartasClashRoyale
 } = require("./resources/words.js");
 const {
   SlashCommandBuilder,
@@ -23,7 +24,8 @@ module.exports = {
         .addChoices(
           { name: "Pro Players Valorant", value: "valorant_jugadores" },
           { name: "Agentes Valorant", value: "valorant_agentes" },
-          { name: "Campeones de Lol", value: "lol_campeones" }
+          { name: "Campeones de Lol", value: "lol_campeones" },
+          { name: "Cartas Clash Royale", value: "cartasClashRoyale" }
         )
     ),
   async execute(interaction) {
