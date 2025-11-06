@@ -2,7 +2,7 @@ const {
   valorant_jugadores,
   valorant_agentes,
   lol_campeones,
-  cartasClashRoyale
+  cartasClashRoyale,
 } = require("./resources/words.js");
 const {
   SlashCommandBuilder,
@@ -22,10 +22,10 @@ module.exports = {
         .setDescription("Categoría del juego")
         .setRequired(true)
         .addChoices(
-          { name: "Pro Players Valorant", value: "valorant_jugadores" },
-          { name: "Agentes Valorant", value: "valorant_agentes" },
-          { name: "Campeones de Lol", value: "lol_campeones" },
-          { name: "Cartas Clash Royale", value: "cartasClashRoyale" }
+          { name: "Pro Players Valorant", value: "JugadoresValorant" },
+          { name: "Agentes Valorant", value: "AgentesValorant" },
+          { name: "Campeones de Lol", value: "CampeonesLol" },
+          { name: "Cartas Clash Royale", value: "CartasClashRoyale" }
         )
     ),
   async execute(interaction) {
@@ -53,7 +53,15 @@ module.exports = {
       .setLabel("Cancelar partida")
       .setStyle(ButtonStyle.Danger);
 
-    let embed = modifyEmbed(playerList);
+    const again = new ButtonBuilder()
+      .setCustomId("again")
+      .setLabel("Jugar de nuevo")
+      .setStyle(ButtonStyle.Success);
+
+    let embed = modifyEmbed(
+      playerList,
+      interaction.options.getString("category")
+    );
 
     const response = await interaction.editReply({
       embeds: [embed],
@@ -67,11 +75,11 @@ module.exports = {
     });
 
     const collector = await response.createMessageComponentCollector({
-      time: 30_000,
+      time: 45_000,
     });
 
     const hostCollector = await hostMessage.createMessageComponentCollector({
-      time: 30_000,
+      time: 45_000,
     });
 
     collector.on("collect", async (i) => {
@@ -83,7 +91,10 @@ module.exports = {
           });
         } else {
           playerList.push(i.user);
-          embed = modifyEmbed(playerList);
+          embed = modifyEmbed(
+            playerList,
+            interaction.options.getString("category")
+          );
           await i.update({ embeds: [embed] });
         }
       }
@@ -95,13 +106,18 @@ module.exports = {
             (player) => player.id === i.user.id
           );
           playerList.splice(index, 1);
-          embed = modifyEmbed(playerList);
+          embed = modifyEmbed(
+            playerList,
+            interaction.options.getString("category")
+          );
           await i.update({ embeds: [embed] });
         } else {
-          await i.reply({
-            content: "No estás en la partida",
-            flags: MessageFlags.Ephemeral,
-          });
+          // Do nothing
+          embed = modifyEmbed(
+            playerList,
+            interaction.options.getString("category")
+          );
+          await i.update({ embeds: [embed] });
         }
       }
     });
@@ -118,7 +134,6 @@ module.exports = {
       }
 
       if (i.customId === "start") {
-
         /* if(playerList.length < 3){
           await i.reply({
             content: "Se necesitan al menos 3 jugadores para iniciar la partida",
@@ -128,7 +143,7 @@ module.exports = {
         } */
 
         hostCollector.stop();
-        collector.stop("time");
+        collector.stop("hostStart");
         await i.update({
           content: "Comenzando partida",
           components: [],
@@ -137,8 +152,8 @@ module.exports = {
       }
     });
 
-    collector.on("end", (collected, reason) => {
-      if (reason == "time") {
+    collector.on("end", async (collected, reason) => {
+      if (reason == "hostStart") {
         if (playerList.length == 0) {
           interaction.editReply({
             content: "No se unió ningún jugador. Partida cancelada.",
@@ -146,10 +161,9 @@ module.exports = {
             components: [],
           });
         } else {
-          interaction.editReply({
-            content: "Comenzando partida...",
+          const response = await interaction.editReply({
             embeds: [embed],
-            components: [],
+            components: [{ type: 1, components: [again] }],
           });
 
           //Conseguir palabras segun categoria
@@ -168,15 +182,92 @@ module.exports = {
           const impostor = playerList[impostorIndex];
 
           //Enviar mensajes privados
-          playerList.forEach((player) => {
+
+          playerList.forEach(async (player) => {
+            const privateMessage = new EmbedBuilder();
+            privateMessage
+              .setTitle("Partida de Impostor:")
+              .setDescription(`Categoría: ${category}`)
+              .setColor("#E74C3C");
             if (player.id === impostor.id) {
-              player.send(`Impostor`);
+              privateMessage.addFields({
+                name: "Rol:",
+                value: "IMPOSTOR",
+              });
             } else {
-              player.send(chosenWord);
+              privateMessage.addFields({
+                name: "Palabra:",
+                value: `**${chosenWord}**`,
+              });
+            }
+            try {
+              await player.send({ content: "", embeds: [privateMessage] });
+            } catch (error) {
+              console.log(
+                `Error al enviar mensaje privado a ${player.username}:`,
+                error
+              );
             }
           });
 
+          // Indicar el orden aleatorio de juego
+          const playerOrder = playerList
+            .map((player) => player.username)
+            .sort(() => Math.random() - 0.5);
+
+          embed.addFields({
+            name: "Orden de juego (aleatorio):",
+            value: "```\n" + playerOrder.join("\n") + "\n```",
+          });
+
+          const finalResponse = interaction.editReply({ embeds: [embed] });
+
+          const againCollector = response.createMessageComponentCollector({
+            time: 120_000,
+          });
+          againCollector.on("collect", async (i) => {
+            if (i.customId === "again") {
+              if (i.user.id !== interaction.user.id) {
+                await i.reply({
+                  content: "Solo el host puede reiniciar la partida",
+                  flags: MessageFlags.Ephemeral,
+                });
+                return;
+              }
+
+              againCollector.stop("restarting");
+
+              // Reiniciar la partida
+              playerList.length = 0; // Vaciar la lista de jugadores
+              embed = modifyEmbed(
+                playerList,
+                interaction.options.getString("category")
+              );
+              await i.update({
+                content: "Nueva partida",
+                embeds: [embed],
+                components: [{ type: 1, components: [join, exit] }],
+              });
+
+              againCollector.on("end", async (collected, reason) => {
+                if (reason !== "restarting") {
+                  interaction.editReply({
+                    embeds: [embed],
+                    components: [],
+                  });
+                }
+              });
+            }
+          });
         }
+      }
+
+      if (reason == "time") {
+        interaction.editReply({
+          content: "Tiempo de espera agotado. Partida cancelada.",
+          embeds: [],
+          components: [],
+        });
       }
 
       if (reason == "cancelled") {
@@ -198,44 +289,38 @@ module.exports = {
   },
 };
 
-function modifyEmbed(playerList) {
+function modifyEmbed(playerList, category) {
   const newEmbed = new EmbedBuilder();
+  newEmbed
+    .setTitle("Partida de Impostor:")
+    .setDescription(`Categoría: ${category}`)
+    .setColor("#E74C3C");
   if (playerList.length == 0) {
-    return newEmbed
-      .setTitle("Partida de Impostor:")
-      .setColor("#E74C3C")
-      .addFields({
-        name: "Jugadores:",
-        value: "No hay jugadores en la partida",
-        inline: false,
-      });
+    return newEmbed.addFields({
+      name: "Jugadores:",
+      value: "No hay jugadores en la partida",
+      inline: false,
+    });
   } else {
     const playerUsernames = playerList.map((user) => user.username);
-    return newEmbed
-      .setTitle("Partida de Impostor:")
-      .setColor("#E74C3C")
-      .addFields({
-        name: `Jugadores (${playerList.length}):`,
-        value: "```\n" + playerUsernames.join("\n") + "\n```",
-        inline: false,
-      });
+    return newEmbed.addFields({
+      name: `Jugadores (${playerList.length}):`,
+      value: "```\n" + playerUsernames.join("\n") + "\n```",
+      inline: false,
+    });
   }
-}
-
-function sendMessage(playerList) {
-  playerList.forEach((player) => {
-    player.send("Te has unido a la partida de Impostor!");
-  });
 }
 
 function getWordsByCategory(category) {
   switch (category) {
-    case "valorant_jugadores":
-      return valorant_jugadores;
-    case "valorant_agentes":
-      return valorant_agentes;
-    case "lol_campeones":
-      return lol_campeones;
+    case "JugadoresValorant":
+      return JugadoresValorant;
+    case "AgentesValorant":
+      return AgentesValorant;
+    case "CampeonesLol":
+      return CampeonesLol;
+    case "CartasClashRoyale":
+      return CartasClashRoyale;
     default:
       return [];
   }
