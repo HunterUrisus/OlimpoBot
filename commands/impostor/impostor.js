@@ -122,7 +122,6 @@ async function startLobby(interaction) {
   });
 
   collector.on("end", async (collected, reason) => {
-    await hostMessage.deleteReply().catch(console.error);
 
     if (reason == "hostStart") {
       if (playerList.length == 0) {
