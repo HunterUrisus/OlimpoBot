@@ -1,10 +1,80 @@
 const valorant_jugadores = [
-  "Keznitdeus",
-  "Mazino",
-  "Shy",
-  "Dantedeus",
-  "Melser",
+    // NRG (Campeones)
+    "brawk",
+    "s0m",
+    "mada",
+    "skuba",
+    "Ethan",
+
+    // FNATIC (Subcampeones)
+    "crashies",
+    "Boaster",
+    "Chronicle",
+    "doma",
+    "kaajak",
+    "Alfajer",
+
+    // DRX (3er lugar)
+    "free1ng",
+    "MaKo",
+    "BeYN",
+    "HYUNMIN",
+    "Flashback",
+
+    // Paper Rex (4to lugar)
+    "Jinggg",
+    "f0rsakeN",
+    "d4v41",
+    "PatMen",
+    "something",
+
+    // MIBR (5to-6to lugar)
+    "cortezia",
+    "artzin",
+    "aspas",
+    "xenom",
+    "Verno",
+
+    // Team Heretics (5to-6to lugar)
+    "Boo",
+    "RieNs",
+    "MiniBoo",
+    "Wo0t",
+    "benjyfishy",
+
+    // G2 Esports (7mo-8vo lugar)
+    "valyn",
+    "jawgemo",
+    "JonahP",
+    "leaf",
+    "trent",
+
+    // GIANTX (7mo-8vo lugar)
+    "Cloud",
+    "grubinho",
+    "Flickless",
+    "ara",
+    "westside",
+
+    // Otros jugadores mencionados en los grupos
+    "zekken", // Sentinels
+    "johnqt", // Sentinels
+    "ZmjjKK", // EDward Gaming
+    "Smoggy", // EDward Gaming
+
+    "Keznitdeus",
+    "Dantedeus",
+    "Melser",
+    "Mazino",
+    "Shyy",
+    "COM",
+    "Tex",
+    "Oxeanos",
+    "Sato",
+    "Derke",
+    ""
 ];
+
 const valorant_agentes = [
   "Astra",
   "Breach",
