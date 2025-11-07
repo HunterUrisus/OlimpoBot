@@ -162,6 +162,8 @@ async function runGame(interaction, playerList, embed, category) {
     name: "Orden de juego (aleatorio):",
     value: "```\n" + playerOrder.join("\n") + "\n```",
   });
+
+  await interaction.editReply({ embeds: [embed], components: [] });
 }
 
 async function sendPlayerDMs(playerList, impostor, chosenWord, category) {
