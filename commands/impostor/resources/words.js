@@ -328,10 +328,40 @@ const cartasClashRoyale = [
   "Princesa",
   "Minero",
 ]; //
+const superheroes_marvel_dc = [
+  // Marvel
+  "Iron Man",
+  "Captain America",
+  "Thor",
+  "Hulk",
+  "Black Widow",
+  "Spider-Man",
+  "Wolverine",
+  "Doctor Strange",
+  "Black Panther",
+  "Captain Marvel",
+  "Scarlet Witch",
+  "Ant-Man",
+
+  // DC
+  "Superman",
+  "Batman",
+  "Wonder Woman",
+  "Flash",
+  "Green Lantern",
+  "Aquaman",
+  "Cyborg",
+  "Shazam",
+  "Green Arrow",
+  "Martian Manhunter",
+  "Batgirl",
+  "Supergirl",
+];
 
 module.exports = {
   valorant_jugadores,
   valorant_agentes,
   lol_campeones,
   cartasClashRoyale,
+  superheroes_marvel_dc,
 };

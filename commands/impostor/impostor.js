@@ -3,6 +3,7 @@ const {
   valorant_agentes,
   lol_campeones,
   cartasClashRoyale,
+  superheroes_marvel_dc,
 } = require("./resources/words.js");
 const {
   SlashCommandBuilder,
@@ -25,7 +26,8 @@ module.exports = {
           { name: "Pro Players Valorant", value: "JugadoresValorant" },
           { name: "Agentes Valorant", value: "AgentesValorant" },
           { name: "Campeones de Lol", value: "CampeonesLol" },
-          { name: "Cartas Clash Royale", value: "CartasClashRoyale" }
+          { name: "Cartas Clash Royale", value: "CartasClashRoyale" },
+          { name: "superheroes", value: "superheroes_marvel_dc"}
         )
     ),
   async execute(interaction) {
@@ -237,6 +239,8 @@ function getWordsByCategory(category) {
       return lol_campeones;
     case "CartasClashRoyale":
       return cartasClashRoyale;
+    case "superheroes_marvel_dc":
+      return superheroes_marvel_dc;
     default:
       return [];
   }
