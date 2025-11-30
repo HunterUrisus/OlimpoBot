@@ -30,9 +30,12 @@ module.exports = {
           // El servidor está en línea, mostramos el número de jugadores.
           const playerCount = data.players.online;
           const maxPlayers = data.players.max;
-          client.user.setActivity(`${playerCount} de ${maxPlayers} jugadores en OlimpoCraft`, {
-            type: ActivityType.Watching,
-          });
+          client.user.setActivity(
+            `${playerCount} de ${maxPlayers} jugadores en OlimpoCraft`,
+            {
+              type: ActivityType.Watching,
+            }
+          );
         } else {
           // El servidor está fuera de línea.
           client.user.setActivity("Servidor Offline", {
