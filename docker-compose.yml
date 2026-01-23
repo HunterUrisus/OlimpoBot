@@ -1,0 +1,7 @@
+services:
+  olimpobot:
+    build: .
+    container_name: olimpobot
+    restart: always
+    env_file:
+      - .env
