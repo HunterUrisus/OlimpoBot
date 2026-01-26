@@ -1,7 +1,6 @@
 const { Events, ActivityType } = require("discord.js");
 const util = require("minecraft-server-util");
 
-
 module.exports = {
   name: Events.ClientReady,
   once: true,
@@ -13,32 +12,22 @@ module.exports = {
 
     const updateActivity = async () => {
       try {
-        const response = await util.status(serverIp, serverPort, { timeout: 5000 });
-        if (!response) {
-          // Si la API devuelve un error (ej: IP inválida), lo mostramos.
-          console.error(`Error al contactar la API: ${response.statusText}`);
-          client.user.setActivity("Error al consultar", {
-            type: ActivityType.Playing,
-          });
-          return;
-        }
+        const response = await util.status(serverIp, serverPort, {
+          timeout: 5000,
+        });
 
-        // Verificamos si el servidor está en línea
-        if (response.online) {
-          // El servidor está en línea, mostramos el número de jugadores.
-          const playerCount = response.players.online;
-          const maxPlayers = response.players.max;
-          client.user.setActivity(
-            `${playerCount} de ${maxPlayers} jugadores en OlimpoCraft Eternal`,
-            {
-              type: ActivityType.Watching,
-            }
-          );
-        }
+        const playerCount = response.players.online;
+        const maxPlayers = response.players.max;
+        client.user.setActivity(
+          `${playerCount} de ${maxPlayers} jugadores en OlimpoCraft Eternal`,
+          {
+            type: ActivityType.Watching,
+          },
+        );
       } catch (error) {
         console.error(
           "No se pudo obtener el estado del servidor de Minecraft:",
-          error
+          error,
         );
         client.user.setActivity("Servidor offline", {
           type: ActivityType.Playing,
