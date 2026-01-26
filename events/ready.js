@@ -1,4 +1,7 @@
 const { Events, ActivityType } = require("discord.js");
+const util = require("minecraft-server-util");
+
+
 module.exports = {
   name: Events.ClientReady,
   once: true,
@@ -6,15 +9,12 @@ module.exports = {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 
     const serverIp = process.env.SERVER_IP;
+    const serverPort = process.env.SERVER_PORT || 25565;
 
     const updateActivity = async () => {
       try {
-        // Hacemos la petición a la API de mcstatus.io
-        const response = await fetch(
-          `https://api.mcstatus.io/v2/status/java/${serverIp}`
-        );
-
-        if (!response.ok) {
+        const response = await util.status(serverIp, serverPort, { timeout: 5000 });
+        if (!response) {
           // Si la API devuelve un error (ej: IP inválida), lo mostramos.
           console.error(`Error al contactar la API: ${response.statusText}`);
           client.user.setActivity("Error al consultar", {
@@ -23,31 +23,24 @@ module.exports = {
           return;
         }
 
-        const data = await response.json();
-
         // Verificamos si el servidor está en línea
-        if (data.online) {
+        if (response.online) {
           // El servidor está en línea, mostramos el número de jugadores.
-          const playerCount = data.players.online;
-          const maxPlayers = data.players.max;
+          const playerCount = response.players.online;
+          const maxPlayers = response.players.max;
           client.user.setActivity(
-            `${playerCount} de ${maxPlayers} jugadores en OlimpoCraft`,
+            `${playerCount} de ${maxPlayers} jugadores en OlimpoCraft Eternal`,
             {
               type: ActivityType.Watching,
             }
           );
-        } else {
-          // El servidor está fuera de línea.
-          client.user.setActivity("Servidor Offline", {
-            type: ActivityType.Playing,
-          });
         }
       } catch (error) {
         console.error(
           "No se pudo obtener el estado del servidor de Minecraft:",
           error
         );
-        client.user.setActivity("Error de Conexión", {
+        client.user.setActivity("Servidor offline", {
           type: ActivityType.Playing,
         });
       }
