@@ -1,5 +1,5 @@
 const { Events, ActivityType } = require("discord.js");
-const util = require("minecraft-server-util");
+const { getServerInfo } = require("../util/server-info");
 
 module.exports = {
   name: Events.ClientReady,
@@ -7,14 +7,15 @@ module.exports = {
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 
-    const serverIp = process.env.SERVER_IP;
-    const serverPort = process.env.SERVER_PORT || 25565;
-
     const updateActivity = async () => {
       try {
-        const response = await util.status(serverIp, serverPort, {
-          timeout: 5000,
-        });
+        const response = await getServerInfo();
+        if (!response) {
+          client.user.setActivity("Servidor offline", {
+            type: ActivityType.Playing,
+          });
+          return;
+        }
 
         const playerCount = response.players.online;
         const maxPlayers = response.players.max;
