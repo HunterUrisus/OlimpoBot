@@ -11,6 +11,11 @@ const {
 } = require("discord.js");
 const { getServerInfo } = require("../util/server-info");
 
+const serverInfo = {
+  online: null,
+  players: null,
+};
+
 const checkMessage = async (client) => {
   const channelId = process.env.CHANNEL_ID;
   if (!channelId) {
@@ -46,6 +51,22 @@ const checkMessage = async (client) => {
   }
 };
 
+const checkForChanges = async () => {
+  const response = await getServerInfo();
+
+  const isNowOnline = response !== null;
+
+  if (serverInfo.online !== isNowOnline) {
+    return true;
+  }
+
+  if (isNowOnline && serverInfo.players !== response.players.online) {
+    return true;
+  }
+
+  return false;
+};
+
 const updateMessage = async (client) => {
   const message = await checkMessage(client);
   if (!message) return;
@@ -53,6 +74,9 @@ const updateMessage = async (client) => {
   const response = await getServerInfo();
 
   if (!response) {
+    serverInfo.online = false;
+    serverInfo.players = 0;
+
     // Servidor offline, reflejar en mensaje
     const file = new AttachmentBuilder("./assets/olimpocraft_logo.png", {
       name: "olimpocraft_logo.png",
@@ -90,6 +114,8 @@ const updateMessage = async (client) => {
     return;
   }
 
+  serverInfo.online = true;
+  serverInfo.players = response.players.online;
   // Mensaje de servidor online
   const file = new AttachmentBuilder("./assets/olimpocraft_logo.png", {
     name: "olimpocraft_logo.png",
@@ -144,8 +170,8 @@ module.exports = {
   once: true,
   async execute(client) {
     updateMessage(client);
-    setInterval(() => {
-      updateMessage(client);
+    setInterval(async () => {
+      if ((await checkForChanges()) === true) updateMessage(client);
     }, 5000); // Actualiza cada 5 segundos
   },
 };
