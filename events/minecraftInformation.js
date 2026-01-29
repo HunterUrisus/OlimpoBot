@@ -116,6 +116,17 @@ const updateMessage = async (client) => {
 
   serverInfo.online = true;
   serverInfo.players = response.players.online;
+  const playersDisplay =
+    serverInfo.players === 0
+      ? "## Jugadores en línea: `0`"
+      : "## Personas conectadas (" +
+        response.players.online +
+        " de " +
+        response.players.max +
+        "):\n```\n" +
+        response.players.sample.map((player) => player.name).join("\n") +
+        "\n```";
+
   // Mensaje de servidor online
   const file = new AttachmentBuilder("./assets/olimpocraft_logo.png", {
     name: "olimpocraft_logo.png",
@@ -145,15 +156,7 @@ const updateMessage = async (client) => {
         new TextDisplayBuilder().setContent("# Estado: `ONLINE`"),
       )
       .addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-          "## Personas conectadas (" +
-            response.players.online +
-            " de " +
-            response.players.max +
-            "):\n```\n" +
-            response.players.sample.map((player) => player.name).join("\n") +
-            "\n```",
-        ),
+        new TextDisplayBuilder().setContent(playersDisplay),
       ),
   ];
 
