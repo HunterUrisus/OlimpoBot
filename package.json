@@ -16,6 +16,7 @@
     "dotenv": "^17.2.3",
     "minecraft-server-util": "^5.4.4",
     "node-fetch": "^3.3.2",
+    "prismarine-nbt": "^2.8.0",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
   }
