@@ -95,7 +95,7 @@ const formatLeaderboard = (title, data, type = "time") => {
         const hours = Math.floor((totalSeconds % 86400) / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         return days > 0
-          ? `${index + 1}. ${username}: ${days}d ${hours}h`
+          ? `${index + 1}. ${username}: ${days}d ${hours}h ${minutes}min`
           : hours === 0
             ? `${index + 1}. ${username}: ${minutes}min`
             : `${index + 1}. ${username}: ${hours}h ${minutes}min`;
