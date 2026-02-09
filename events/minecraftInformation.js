@@ -208,14 +208,20 @@ const refreshDiscordMessage = async (client) => {
   }
 };
 
+const getTodayString = () => {
+  return new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Santiago",
+  });
+};
+
 const taskUpdatePlaytimeDB = async () => {
   if (!localState.server.online || localState.server.player_list.length === 0)
     return;
 
-  const today = new Date();
+  const todayStr = getTodayString();
 
   for (const player of localState.server.player_list) {
-    const [playerRecord, created] = await MinecraftPlayers.findOrCreate({
+    const [playerRecord] = await MinecraftPlayers.findOrCreate({
       where: { id: player.id },
       defaults: {
         username: player.name,
@@ -231,7 +237,10 @@ const taskUpdatePlaytimeDB = async () => {
     await playerRecord.save();
 
     const [log] = await MinecraftPlaytime.findOrCreate({
-      where: { player_id: player.id, date: today },
+      where: {
+        player_id: player.id,
+        date: todayStr,
+      },
       defaults: { seconds_played: 0 },
     });
 
