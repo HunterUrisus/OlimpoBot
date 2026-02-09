@@ -215,36 +215,44 @@ const getTodayString = () => {
 };
 
 const taskUpdatePlaytimeDB = async () => {
-  if (!localState.server.online || localState.server.player_list.length === 0)
-    return;
+  if (!localState.server.online || localState.server.player_list.length === 0) return;
 
   const todayStr = getTodayString();
 
   for (const player of localState.server.player_list) {
-    const [playerRecord] = await MinecraftPlayers.findOrCreate({
-      where: { id: player.id },
-      defaults: {
-        username: player.name,
-        hours_played: 0,
-        last_joined: new Date(),
-      },
+    let playerRecord = null;
+
+    playerRecord = await MinecraftPlayers.findOne({
+      where: { username: player.name }
     });
 
-    playerRecord.last_joined = new Date();
-    if (playerRecord.username !== player.name) {
-      playerRecord.username = player.name;
+    if (!playerRecord) {
+       const [newRecord] = await MinecraftPlayers.findOrCreate({
+          where: { id: player.id },
+          defaults: {
+            username: player.name,
+            hours_played: 0,
+            last_joined: new Date(),
+          },
+       });
+       playerRecord = newRecord;
     }
-    await playerRecord.save();
+
+    await playerRecord.update({ 
+        last_joined: new Date(),
+        username: player.name
+    });
 
     const [log] = await MinecraftPlaytime.findOrCreate({
       where: {
-        player_id: player.id,
+        player_id: playerRecord.id,
         date: todayStr,
       },
       defaults: { seconds_played: 0 },
     });
 
     await log.increment("seconds_played", { by: 5 });
+    console.log(`Actualizado: ${playerRecord.username} - ID DB: ${playerRecord.id}`);
   }
 };
 
