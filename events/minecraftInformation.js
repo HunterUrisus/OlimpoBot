@@ -65,28 +65,40 @@ const formatLeaderboard = (title, data, type = "time") => {
 
   const list = data
     .map((user, index) => {
+      const username = user.minecraft_player?.username || user.username;
+
       if (type === "date") {
-        const date = user.last_joined
-          ? new Date(user.last_joined).toLocaleString("es-CL", {
-              timeZone: "America/Santiago",
-              day: "2-digit",
-              month: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
-          : "N/A";
-        return `${index + 1}. ${user.username}: ${date}`;
+        const isOnline = localState.server.player_list.some(
+          (p) => p.name === username,
+        );
+
+        let dateDisplay;
+        if (isOnline) {
+          dateDisplay = "🟢 Online";
+        } else {
+          dateDisplay = user.last_joined
+            ? new Date(user.last_joined).toLocaleString("es-CL", {
+                timeZone: "America/Santiago",
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
+            : "N/A";
+        }
+
+        return `${index + 1}. ${username}: ${dateDisplay}`;
       } else {
         const totalSeconds = user.get("total_seconds") || 0;
         const days = Math.floor(totalSeconds / 86400);
         const hours = Math.floor((totalSeconds % 86400) / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         return days > 0
-          ? `${index + 1}. ${user.minecraft_player?.username || user.username}: ${days}d ${hours}h`
+          ? `${index + 1}. ${username}: ${days}d ${hours}h`
           : hours === 0
-            ? `${index + 1}. ${user.minecraft_player?.username || user.username}: ${minutes}min`
-            : `${index + 1}. ${user.minecraft_player?.username || user.username}: ${hours}h ${minutes}min`;
+            ? `${index + 1}. ${username}: ${minutes}min`
+            : `${index + 1}. ${username}: ${hours}h ${minutes}min`;
       }
     })
     .join("\n");
@@ -203,7 +215,7 @@ const taskUpdatePlaytimeDB = async () => {
   const today = new Date();
 
   for (const player of localState.server.player_list) {
-    await MinecraftPlayers.findOrCreate({
+    const [playerRecord, created] = await MinecraftPlayers.findOrCreate({
       where: { id: player.id },
       defaults: {
         username: player.name,
@@ -211,6 +223,12 @@ const taskUpdatePlaytimeDB = async () => {
         last_joined: new Date(),
       },
     });
+
+    playerRecord.last_joined = new Date();
+    if (playerRecord.username !== player.name) {
+      playerRecord.username = player.name;
+    }
+    await playerRecord.save();
 
     const [log] = await MinecraftPlaytime.findOrCreate({
       where: { player_id: player.id, date: today },
